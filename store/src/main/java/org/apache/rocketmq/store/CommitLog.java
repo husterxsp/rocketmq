@@ -571,6 +571,8 @@ public class CommitLog {
 
         long eclipseTimeInLock = 0;
         MappedFile unlockMappedFile = null;
+
+        // mmap 高效的内存映射
         MappedFile mappedFile = this.mappedFileQueue.getLastMappedFile();
 
         putMessageLock.lock(); //spin or ReentrantLock ,depending on store config

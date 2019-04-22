@@ -89,12 +89,19 @@ public class MQClientInstance {
     private final int instanceIndex;
     private final String clientId;
     private final long bootTimestamp = System.currentTimeMillis();
+
+    // 这几个比较关键，按照组的概念，缓存实例
     private final ConcurrentMap<String/* group */, MQProducerInner> producerTable = new ConcurrentHashMap<String, MQProducerInner>();
     private final ConcurrentMap<String/* group */, MQConsumerInner> consumerTable = new ConcurrentHashMap<String, MQConsumerInner>();
     private final ConcurrentMap<String/* group */, MQAdminExtInner> adminExtTable = new ConcurrentHashMap<String, MQAdminExtInner>();
+
     private final NettyClientConfig nettyClientConfig;
     private final MQClientAPIImpl mQClientAPIImpl;
+
+    // 命令行工具的实现
     private final MQAdminImpl mQAdminImpl;
+
+    // topic信息表
     private final ConcurrentMap<String/* Topic */, TopicRouteData> topicRouteTable = new ConcurrentHashMap<String, TopicRouteData>();
     private final Lock lockNamesrv = new ReentrantLock();
     private final Lock lockHeartbeat = new ReentrantLock();
@@ -235,10 +242,13 @@ public class MQClientInstance {
                     // Start various schedule tasks
                     this.startScheduledTask();
                     // Start pull service
+                    // rocketmq有推、拉两种模式
                     this.pullMessageService.start();
                     // Start rebalance service
+                    // 负载均衡服务
                     this.rebalanceService.start();
                     // Start push service
+                    //
                     this.defaultMQProducer.getDefaultMQProducerImpl().start(false);
                     log.info("the client factory [{}] start OK", this.clientId);
                     this.serviceState = ServiceState.RUNNING;
@@ -255,6 +265,9 @@ public class MQClientInstance {
         }
     }
 
+    /**
+     * client 启动时，开启各种定时任务
+     */
     private void startScheduledTask() {
         if (null == this.clientConfig.getNamesrvAddr()) {
             this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
@@ -287,6 +300,7 @@ public class MQClientInstance {
             @Override
             public void run() {
                 try {
+                    // 定时汇报路由信息
                     MQClientInstance.this.cleanOfflineBroker();
                     MQClientInstance.this.sendHeartbeatToAllBrokerWithLock();
                 } catch (Exception e) {
@@ -300,6 +314,7 @@ public class MQClientInstance {
             @Override
             public void run() {
                 try {
+                    // 持久化消息进度，后续可看一下消费进度的管理
                     MQClientInstance.this.persistAllConsumerOffset();
                 } catch (Exception e) {
                     log.error("ScheduledTask persistAllConsumerOffset exception", e);
@@ -312,6 +327,7 @@ public class MQClientInstance {
             @Override
             public void run() {
                 try {
+                    // 动态调整线程池。
                     MQClientInstance.this.adjustThreadPool();
                 } catch (Exception e) {
                     log.error("ScheduledTask adjustThreadPool exception", e);
@@ -602,6 +618,7 @@ public class MQClientInstance {
                             }
                         }
                     } else {
+                        // 一开始没有路由信息，所以要从nameserver获取。
                         topicRouteData = this.mQClientAPIImpl.getTopicRouteInfoFromNameServer(topic, 1000 * 3);
                     }
                     if (topicRouteData != null) {

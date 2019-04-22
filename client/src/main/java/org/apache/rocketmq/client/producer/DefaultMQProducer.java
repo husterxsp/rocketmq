@@ -64,6 +64,10 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
     private final InternalLogger log = ClientLogger.getLog();
 
     /**
+     * transient 表示不会序列化，一般针对一些敏感信息
+     *
+     * DefaultMQProducerImpl：生产者主要的实现逻辑
+     *
      * Wrapping internal implementations for virtually all methods presented in this class.
      */
     protected final transient DefaultMQProducerImpl defaultMQProducerImpl;
@@ -77,16 +81,21 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
      * </p>
      *
      * See {@linktourl http://rocketmq.apache.org/docs/core-concept/} for more discussion.
+     *
+     * 生产者组
+     *
      */
     private String producerGroup;
 
     /**
      * Just for testing or demo program
+     * 自动创建topic
      */
     private String createTopicKey = MixAll.AUTO_CREATE_TOPIC_KEY_TOPIC;
 
     /**
      * Number of queues to create per default topic.
+     * 默认一个topic分配4个queue
      */
     private volatile int defaultTopicQueueNums = 4;
 
@@ -97,6 +106,7 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
 
     /**
      * Compress message body threshold, namely, message body larger than 4k will be compressed on default.
+     * 消息体超过4k, 开启压缩
      */
     private int compressMsgBodyOverHowmuch = 1024 * 4;
 
@@ -105,6 +115,7 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
      * </p>
      *
      * This may potentially cause message duplication which is up to application developers to resolve.
+     * 重试机制，默认重试两次，总共三次机会
      */
     private int retryTimesWhenSendFailed = 2;
 
@@ -113,6 +124,7 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
      * </p>
      *
      * This may potentially cause message duplication which is up to application developers to resolve.
+     * 异步发送
      */
     private int retryTimesWhenSendAsyncFailed = 2;
 
@@ -123,6 +135,7 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
 
     /**
      * Maximum allowed message size in bytes.
+     * 最大允许的消息体大小。
      */
     private int maxMessageSize = 1024 * 1024 * 4; // 4M
 

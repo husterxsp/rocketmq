@@ -57,6 +57,7 @@ public class MQFaultStrategy {
 
     public MessageQueue selectOneMessageQueue(final TopicPublishInfo tpInfo, final String lastBrokerName) {
         if (this.sendLatencyFaultEnable) {
+            // 开启高可用
             try {
                 int index = tpInfo.getSendWhichQueue().getAndIncrement();
                 for (int i = 0; i < tpInfo.getMessageQueueList().size(); i++) {
@@ -89,6 +90,7 @@ public class MQFaultStrategy {
             return tpInfo.selectOneMessageQueue();
         }
 
+        // 非高可用模式
         return tpInfo.selectOneMessageQueue(lastBrokerName);
     }
 

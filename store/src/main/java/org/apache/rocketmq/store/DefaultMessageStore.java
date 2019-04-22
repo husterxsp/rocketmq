@@ -351,6 +351,13 @@ public class DefaultMessageStore implements MessageStore {
         }
     }
 
+    /**
+     *
+     * 处理消息存储
+     *
+     * @param msg Message instance to store
+     * @return
+     */
     public PutMessageResult putMessage(MessageExtBrokerInner msg) {
         if (this.shutdown) {
             log.warn("message store has shutdown, so putMessage is forbidden");
@@ -392,6 +399,8 @@ public class DefaultMessageStore implements MessageStore {
         }
 
         long beginTime = this.getSystemClock().now();
+
+        // 存入 commitLog
         PutMessageResult result = this.commitLog.putMessage(msg);
 
         long eclipseTime = this.getSystemClock().now() - beginTime;

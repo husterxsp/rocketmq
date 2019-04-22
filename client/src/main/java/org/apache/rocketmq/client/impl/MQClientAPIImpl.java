@@ -222,6 +222,7 @@ public class MQClientAPIImpl {
     }
 
     public void start() {
+
         this.remotingClient.start();
     }
 

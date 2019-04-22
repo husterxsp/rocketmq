@@ -79,8 +79,10 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
 
                 RemotingCommand response;
                 if (requestHeader.isBatch()) {
+                    // 批量发送
                     response = this.sendBatchMessage(ctx, request, mqtraceContext, requestHeader);
                 } else {
+                    // 发送单条
                     response = this.sendMessage(ctx, request, mqtraceContext, requestHeader);
                 }
 
@@ -333,6 +335,8 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
         msgInner.setTopic(requestHeader.getTopic());
         msgInner.setQueueId(queueIdInt);
 
+        // 死信队列处理
+        // 消息重试到指定次数（默认16），就会放到死信队列
         if (!handleRetryAndDLQ(requestHeader, response, request, msgInner, topicConfig)) {
             return response;
         }

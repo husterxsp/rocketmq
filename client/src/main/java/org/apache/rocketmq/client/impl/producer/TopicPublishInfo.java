@@ -72,6 +72,7 @@ public class TopicPublishInfo {
         } else {
             int index = this.sendWhichQueue.getAndIncrement();
             for (int i = 0; i < this.messageQueueList.size(); i++) {
+                // 直接简单取模，轮询，拿到消息队列
                 int pos = Math.abs(index++) % this.messageQueueList.size();
                 if (pos < 0)
                     pos = 0;
