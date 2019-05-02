@@ -22,49 +22,49 @@
 <!--Refer http://checkstyle.sourceforge.net/reports/google-java-style.html#s2.2-file-encoding -->
 <module name="Checker">
 
-    <property name="localeLanguage" value="en"/>
+    <!--<property name="localeLanguage" value="en"/>-->
 
-    <!--To configure the check to report on the first instance in each file-->
-    <module name="FileTabCharacter"/>
+    <!--&lt;!&ndash;To configure the check to report on the first instance in each file&ndash;&gt;-->
+    <!--<module name="FileTabCharacter"/>-->
 
-    <!-- header -->
-    <module name="RegexpHeader">
-        <property name="header" value="/\*\nLicensed to the Apache Software Foundation*"/>
-        <property name="fileExtensions" value="java"/>
-    </module>
+    <!--&lt;!&ndash; header &ndash;&gt;-->
+    <!--<module name="RegexpHeader">-->
+        <!--<property name="header" value="/\*\nLicensed to the Apache Software Foundation*"/>-->
+        <!--<property name="fileExtensions" value="java"/>-->
+    <!--</module>-->
 
-    <module name="RegexpHeader">
-        <property name="header" value="#[\s]*Licensed to the Apache Software Foundation*"/>
-        <property name="fileExtensions" value="properties"/>
-    </module>
+    <!--<module name="RegexpHeader">-->
+        <!--<property name="header" value="#[\s]*Licensed to the Apache Software Foundation*"/>-->
+        <!--<property name="fileExtensions" value="properties"/>-->
+    <!--</module>-->
 
-    <module name="RegexpSingleline">
-        <property name="format" value="System\.out\.println"/>
-        <property name="message" value="Prohibit invoking System.out.println in source code !"/>
-    </module>
+    <!--<module name="RegexpSingleline">-->
+        <!--<property name="format" value="System\.out\.println"/>-->
+        <!--<property name="message" value="Prohibit invoking System.out.println in source code !"/>-->
+    <!--</module>-->
 
-    <module name="RegexpSingleline">
-        <property name="format" value="//FIXME"/>
-        <property name="message" value="Recommended fix FIXME task !"/>
-    </module>
+    <!--<module name="RegexpSingleline">-->
+        <!--<property name="format" value="//FIXME"/>-->
+        <!--<property name="message" value="Recommended fix FIXME task !"/>-->
+    <!--</module>-->
 
-    <module name="RegexpSingleline">
-        <property name="format" value="//TODO"/>
-        <property name="message" value="Recommended fix TODO task !"/>
-    </module>
+    <!--<module name="RegexpSingleline">-->
+        <!--<property name="format" value="//TODO"/>-->
+        <!--<property name="message" value="Recommended fix TODO task !"/>-->
+    <!--</module>-->
 
-    <module name="RegexpSingleline">
-        <property name="format" value="@alibaba"/>
-        <property name="message" value="Recommended remove @alibaba keyword!"/>
-    </module>
-    <module name="RegexpSingleline">
-        <property name="format" value="@taobao"/>
-        <property name="message" value="Recommended remove @taobao keyword!"/>
-    </module>
-    <module name="RegexpSingleline">
-        <property name="format" value="@author"/>
-        <property name="message" value="Recommended remove @author tag in javadoc!"/>
-    </module>
+    <!--<module name="RegexpSingleline">-->
+        <!--<property name="format" value="@alibaba"/>-->
+        <!--<property name="message" value="Recommended remove @alibaba keyword!"/>-->
+    <!--</module>-->
+    <!--<module name="RegexpSingleline">-->
+        <!--<property name="format" value="@taobao"/>-->
+        <!--<property name="message" value="Recommended remove @taobao keyword!"/>-->
+    <!--</module>-->
+    <!--<module name="RegexpSingleline">-->
+        <!--<property name="format" value="@author"/>-->
+        <!--<property name="message" value="Recommended remove @author tag in javadoc!"/>-->
+    <!--</module>-->
 
     <!--<module name="RegexpSingleline">-->
         <!--<property name="format"-->

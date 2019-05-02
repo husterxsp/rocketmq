@@ -106,12 +106,19 @@ public class DefaultMessageStoreTest {
 
     private MessageStore buildMessageStore() throws Exception {
         MessageStoreConfig messageStoreConfig = new MessageStoreConfig();
+        // commitlog切割
         messageStoreConfig.setMapedFileSizeCommitLog(1024 * 1024 * 10);
         messageStoreConfig.setMapedFileSizeConsumeQueue(1024 * 1024 * 10);
         messageStoreConfig.setMaxHashSlotNum(10000);
         messageStoreConfig.setMaxIndexNum(100 * 100);
-        messageStoreConfig.setFlushDiskType(FlushDiskType.SYNC_FLUSH);
+        // 刷盘方式，同步，异步
+        messageStoreConfig.setFlushDiskType(FlushDiskType.ASYNC_FLUSH);
+//        messageStoreConfig.setFlushDiskType(FlushDiskType.SYNC_FLUSH);
+
+//        刷盘间隔
         messageStoreConfig.setFlushIntervalConsumeQueue(1);
+
+        // 构建核心处理类 对象
         return new DefaultMessageStore(messageStoreConfig, new BrokerStatsManager("simpleTest"), new MyMessageArrivingListener(), new BrokerConfig());
     }
 
@@ -404,6 +411,12 @@ public class DefaultMessageStoreTest {
         }
     }
 
+    /**
+     * 构建消息
+     * @param messageBody
+     * @param topic
+     * @return
+     */
     private MessageExtBrokerInner buildMessage(byte[] messageBody, String topic) {
         MessageExtBrokerInner msg = new MessageExtBrokerInner();
         msg.setTopic(topic);

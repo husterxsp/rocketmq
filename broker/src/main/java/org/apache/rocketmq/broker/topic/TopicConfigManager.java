@@ -158,12 +158,15 @@ public class TopicConfigManager extends ConfigManager {
         boolean createNew = false;
 
         try {
+            // 加锁
             if (this.lockTopicConfigTable.tryLock(LOCK_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)) {
                 try {
                     topicConfig = this.topicConfigTable.get(topic);
+                    // topic有，直接返回
                     if (topicConfig != null)
                         return topicConfig;
 
+                    // topic没有，又开启了自动创建，根据默认的config来生成新topic的config
                     TopicConfig defaultTopicConfig = this.topicConfigTable.get(defaultTopic);
                     if (defaultTopicConfig != null) {
                         if (defaultTopic.equals(MixAll.AUTO_CREATE_TOPIC_KEY_TOPIC)) {
@@ -199,6 +202,7 @@ public class TopicConfigManager extends ConfigManager {
                             defaultTopic, remoteAddress);
                     }
 
+                    // 创建topic
                     if (topicConfig != null) {
                         log.info("Create new topic by default topic:[{}] config:[{}] producer:[{}]",
                             defaultTopic, topicConfig, remoteAddress);
@@ -220,6 +224,7 @@ public class TopicConfigManager extends ConfigManager {
         }
 
         if (createNew) {
+            // 向nameserver注册topic,同步topic信息给slave
             this.brokerController.registerBrokerAll(false, true,true);
         }
 

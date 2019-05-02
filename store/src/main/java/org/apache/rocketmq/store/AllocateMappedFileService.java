@@ -32,6 +32,9 @@ import org.apache.rocketmq.logging.InternalLoggerFactory;
 import org.apache.rocketmq.store.config.BrokerRole;
 
 /**
+ *
+ * 服务线程
+ *
  * Create MappedFile in advance
  */
 public class AllocateMappedFileService extends ServiceThread {
@@ -49,10 +52,16 @@ public class AllocateMappedFileService extends ServiceThread {
     }
 
     public MappedFile putRequestAndReturnMappedFile(String nextFilePath, String nextNextFilePath, int fileSize) {
+//        默认两个请求
         int canSubmitRequests = 2;
+
+//        映射文件的创建有两种方式 对应mappedfile的两个构造函数
         if (this.messageStore.getMessageStoreConfig().isTransientStorePoolEnable()) {
             if (this.messageStore.getMessageStoreConfig().isFastFailIfNoBufferInStorePool()
-                && BrokerRole.SLAVE != this.messageStore.getMessageStoreConfig().getBrokerRole()) { //if broker is slave, don't fast fail even no buffer in pool
+                && BrokerRole.SLAVE != this.messageStore.getMessageStoreConfig().getBrokerRole()) {
+                //if broker is slave, don't fast fail even no buffer in pool
+
+//                判断当前内存池是否够用。
                 canSubmitRequests = this.messageStore.getTransientStorePool().remainBufferNumbs() - this.requestQueue.size();
             }
         }
@@ -60,6 +69,7 @@ public class AllocateMappedFileService extends ServiceThread {
         AllocateRequest nextReq = new AllocateRequest(nextFilePath, fileSize);
         boolean nextPutOK = this.requestTable.putIfAbsent(nextFilePath, nextReq) == null;
 
+        // 处理第一个请求
         if (nextPutOK) {
             if (canSubmitRequests <= 0) {
                 log.warn("[NOTIFYME]TransientStorePool is not enough, so create mapped file error, " +
@@ -74,6 +84,7 @@ public class AllocateMappedFileService extends ServiceThread {
             canSubmitRequests--;
         }
 
+//        处理第二个请求，预创建文件
         AllocateRequest nextNextReq = new AllocateRequest(nextNextFilePath, fileSize);
         boolean nextNextPutOK = this.requestTable.putIfAbsent(nextNextFilePath, nextNextReq) == null;
         if (nextNextPutOK) {
@@ -131,6 +142,10 @@ public class AllocateMappedFileService extends ServiceThread {
         }
     }
 
+    /**
+     * 服务线程
+     * 不断从requestQueue里取请求并处理。
+     */
     public void run() {
         log.info(this.getServiceName() + " service started");
 
@@ -164,7 +179,9 @@ public class AllocateMappedFileService extends ServiceThread {
                 long beginTime = System.currentTimeMillis();
 
                 MappedFile mappedFile;
+//                创建新的mappedfile
                 if (messageStore.getMessageStoreConfig().isTransientStorePoolEnable()) {
+//                    启用内存池
                     try {
                         mappedFile = ServiceLoader.load(MappedFile.class).iterator().next();
                         mappedFile.init(req.getFilePath(), req.getFileSize(), messageStore.getTransientStorePool());
@@ -173,6 +190,7 @@ public class AllocateMappedFileService extends ServiceThread {
                         mappedFile = new MappedFile(req.getFilePath(), req.getFileSize(), messageStore.getTransientStorePool());
                     }
                 } else {
+//                    直接创建
                     mappedFile = new MappedFile(req.getFilePath(), req.getFileSize());
                 }
 
@@ -188,6 +206,7 @@ public class AllocateMappedFileService extends ServiceThread {
                     .getMapedFileSizeCommitLog()
                     &&
                     this.messageStore.getMessageStoreConfig().isWarmMapedFileEnable()) {
+//                    预热?
                     mappedFile.warmMappedFile(this.messageStore.getMessageStoreConfig().getFlushDiskType(),
                         this.messageStore.getMessageStoreConfig().getFlushLeastPagesWhenWarmMapedFile());
                 }

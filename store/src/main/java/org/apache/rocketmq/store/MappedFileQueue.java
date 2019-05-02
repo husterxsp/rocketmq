@@ -144,6 +144,13 @@ public class MappedFileQueue {
         }
     }
 
+    /**
+     * 对mappedfilequeue中的mappedfile进行初始化、
+     *
+     * broker启动的时候运行
+     *
+     * @return
+     */
     public boolean load() {
         File dir = new File(this.storePath);
         File[] files = dir.listFiles();
@@ -204,12 +211,16 @@ public class MappedFileQueue {
         }
 
         if (createOffset != -1 && needCreate) {
+
+            // 一次性创建两个文件
             String nextFilePath = this.storePath + File.separator + UtilAll.offset2FileName(createOffset);
             String nextNextFilePath = this.storePath + File.separator
                 + UtilAll.offset2FileName(createOffset + this.mappedFileSize);
             MappedFile mappedFile = null;
 
             if (this.allocateMappedFileService != null) {
+                // 创建新文件
+                // 传入两个文件路径
                 mappedFile = this.allocateMappedFileService.putRequestAndReturnMappedFile(nextFilePath,
                     nextNextFilePath, this.mappedFileSize);
             } else {
@@ -233,6 +244,11 @@ public class MappedFileQueue {
         return mappedFileLast;
     }
 
+    /**
+     * 创建映射文件
+     * @param startOffset
+     * @return
+     */
     public MappedFile getLastMappedFile(final long startOffset) {
         return getLastMappedFile(startOffset, true);
     }
@@ -424,6 +440,7 @@ public class MappedFileQueue {
 
     public boolean flush(final int flushLeastPages) {
         boolean result = true;
+        // 根据最近刷盘位置找到对应的mappedfile
         MappedFile mappedFile = this.findMappedFileByOffset(this.flushedWhere, this.flushedWhere == 0);
         if (mappedFile != null) {
             long tmpTimeStamp = mappedFile.getStoreTimestamp();

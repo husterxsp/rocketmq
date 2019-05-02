@@ -31,9 +31,21 @@ import sun.nio.ch.DirectBuffer;
 public class TransientStorePool {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 
+    /**
+     * 默认是5
+     */
     private final int poolSize;
+
+    /**
+     * 默认是1G
+     */
     private final int fileSize;
+
+    /**
+     * 双端队列，保存堆外内存的buffer
+     */
     private final Deque<ByteBuffer> availableBuffers;
+
     private final MessageStoreConfig storeConfig;
 
     public TransientStorePool(final MessageStoreConfig storeConfig) {
