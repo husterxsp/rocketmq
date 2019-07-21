@@ -141,12 +141,19 @@ public class BrokerOuterAPI {
             final byte[] body = requestBody.encode(compressed);
             final int bodyCrc32 = UtilAll.crc32(body);
             requestHeader.setBodyCrc32(bodyCrc32);
+
+
             final CountDownLatch countDownLatch = new CountDownLatch(nameServerAddressList.size());
+
+            // 是遍历 NameServer 列表， Broker 消息服务器依次向NameServer 发送心跳包。
+            // 遍历所有NameServer 列表
             for (final String namesrvAddr : nameServerAddressList) {
+
                 brokerOuterExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
+                            // ／／ 分别向Name Server 注册
                             RegisterBrokerResult result = registerBroker(namesrvAddr,oneway, timeoutMills,requestHeader,body);
                             if (result != null) {
                                 registerBrokerResultList.add(result);

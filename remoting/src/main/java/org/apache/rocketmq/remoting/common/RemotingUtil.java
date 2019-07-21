@@ -167,12 +167,18 @@ public class RemotingUtil {
         SocketChannel sc = null;
         try {
             sc = SocketChannel.open();
+            // 连接之前是阻塞的
             sc.configureBlocking(true);
             sc.socket().setSoLinger(false, -1);
+
+            // 设置非delay, 就是就算是小的包，也要发出去
             sc.socket().setTcpNoDelay(true);
+
             sc.socket().setReceiveBufferSize(1024 * 64);
             sc.socket().setSendBufferSize(1024 * 64);
             sc.socket().connect(remote, timeoutMillis);
+
+            // 连接之后设置非阻塞，确保connect是阻塞的
             sc.configureBlocking(false);
             return sc;
         } catch (Exception e) {

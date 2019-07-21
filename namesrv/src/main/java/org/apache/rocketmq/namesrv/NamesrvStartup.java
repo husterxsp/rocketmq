@@ -79,10 +79,18 @@ public class NamesrvStartup {
             return null;
         }
 
+        // 首先来解析配置文件
+        // NameServer 业务参数
         final NamesrvConfig namesrvConfig = new NamesrvConfig();
+        // NameServer 业务参数
         final NettyServerConfig nettyServerConfig = new NettyServerConfig();
+
         nettyServerConfig.setListenPort(9876);
+
+        // -c configFile 通过，c 命令指定配置文件的路径。
+        // 使用“ 一属性名属性值”，例如一listenPort 9876 。
         if (commandLine.hasOption('c')) {
+
             String file = commandLine.getOptionValue('c');
             if (file != null) {
                 InputStream in = new BufferedInputStream(new FileInputStream(file));
@@ -97,7 +105,7 @@ public class NamesrvStartup {
                 in.close();
             }
         }
-
+        // 打印配置信息
         if (commandLine.hasOption('p')) {
             InternalLogger console = InternalLoggerFactory.getLogger(LoggerName.NAMESRV_CONSOLE_NAME);
             MixAll.printObjectProperties(console, namesrvConfig);
@@ -143,6 +151,11 @@ public class NamesrvStartup {
             System.exit(-3);
         }
 
+        // 如果代码中使用了线程池，一种优雅停机的方式就是注册一个JVM 钩子函数，
+        // 在JVM 进程关闭之前，先将线程池关闭，及时释放资源。
+        // addShutdownHook 可以jvm关闭时执行一些收尾工作，避免一些任务没执行完就关闭了。（https://www.jianshu.com/p/5e6dffd1776f）
+        // https://blog.csdn.net/u011001084/article/details/73480432
+        // 如这篇博文里介绍的正常关闭和异常关闭
         Runtime.getRuntime().addShutdownHook(new ShutdownHookThread(log, new Callable<Void>() {
             @Override
             public Void call() throws Exception {

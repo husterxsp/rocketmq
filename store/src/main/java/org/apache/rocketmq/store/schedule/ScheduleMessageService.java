@@ -259,6 +259,9 @@ public class ScheduleMessageService extends ConfigManager {
             return result;
         }
 
+        /**
+         * 把consumerQueue里的消息拿到之后再放到另外一个task里
+         */
         public void executeOnTimeup() {
             ConsumeQueue cq =
                 ScheduleMessageService.this.defaultMessageStore.findConsumeQueue(SCHEDULE_TOPIC,
@@ -291,12 +294,15 @@ public class ScheduleMessageService extends ConfigManager {
                             }
 
                             long now = System.currentTimeMillis();
+                            // 这里 tag
                             long deliverTimestamp = this.correctDeliverTimestamp(now, tagsCode);
 
                             nextOffset = offset + (i / ConsumeQueue.CQ_STORE_UNIT_SIZE);
 
+                            // 倒计时
                             long countdown = deliverTimestamp - now;
 
+                            // 时间到了，需要马上投递延迟消息
                             if (countdown <= 0) {
                                 MessageExt msgExt =
                                     ScheduleMessageService.this.defaultMessageStore.lookMessageByOffset(
@@ -304,6 +310,7 @@ public class ScheduleMessageService extends ConfigManager {
 
                                 if (msgExt != null) {
                                     try {
+//                                        这里又构建一个新的message
                                         MessageExtBrokerInner msgInner = this.messageTimeup(msgExt);
                                         PutMessageResult putMessageResult =
                                             ScheduleMessageService.this.writeMessageStore

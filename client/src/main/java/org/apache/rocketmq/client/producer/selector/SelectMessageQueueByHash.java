@@ -25,7 +25,7 @@ public class SelectMessageQueueByHash implements MessageQueueSelector {
 
     @Override
     public MessageQueue select(List<MessageQueue> mqs, Message msg, Object arg) {
-        int value = arg.hashCode();
+               int value = arg.hashCode();
         if (value < 0) {
             value = Math.abs(value);
         }

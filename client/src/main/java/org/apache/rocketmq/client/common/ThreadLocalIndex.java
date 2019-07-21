@@ -33,8 +33,10 @@ public class ThreadLocalIndex {
         }
 
         index = Math.abs(index + 1);
-        if (index < 0)
+        // ???
+        if (index < 0) {
             index = 0;
+        }
 
         this.threadLocalIndex.set(index);
         return index;

@@ -66,6 +66,8 @@ public class DefaultMessageStoreTest {
 
         messageStore = buildMessageStore();
         boolean load = messageStore.load();
+
+
         assertTrue(load);
         messageStore.start();
     }
@@ -113,6 +115,7 @@ public class DefaultMessageStoreTest {
         messageStoreConfig.setMaxIndexNum(100 * 100);
         // 刷盘方式，同步，异步
         messageStoreConfig.setFlushDiskType(FlushDiskType.ASYNC_FLUSH);
+        messageStoreConfig.setTransientStorePoolEnable(true);
 //        messageStoreConfig.setFlushDiskType(FlushDiskType.SYNC_FLUSH);
 
 //        刷盘间隔
@@ -482,13 +485,16 @@ public class DefaultMessageStoreTest {
 
     @Test
     public void testRecover() throws Exception {
+
+        PutMessageResult r = null;
+
         String topic = "recoverTopic";
         MessageBody = StoreMessage.getBytes();
         for (int i = 0; i < 100; i++) {
             MessageExtBrokerInner messageExtBrokerInner = buildMessage();
             messageExtBrokerInner.setTopic(topic);
             messageExtBrokerInner.setQueueId(0);
-            messageStore.putMessage(messageExtBrokerInner);
+            r = messageStore.putMessage(messageExtBrokerInner);
         }
 
        // Thread.sleep(100);//wait for build consumer queue

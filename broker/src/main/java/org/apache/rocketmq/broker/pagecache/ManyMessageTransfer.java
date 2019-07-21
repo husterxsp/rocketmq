@@ -58,6 +58,14 @@ public class ManyMessageTransfer extends AbstractReferenceCounted implements Fil
         return byteBufferHeader.limit() + this.getMessageResult.getBufferTotalSize();
     }
 
+
+    /**
+     *
+     * @param target
+     * @param position
+     * @return
+     * @throws IOException
+     */
     @Override
     public long transferTo(WritableByteChannel target, long position) throws IOException {
         if (this.byteBufferHeader.hasRemaining()) {
@@ -67,6 +75,8 @@ public class ManyMessageTransfer extends AbstractReferenceCounted implements Fil
             List<ByteBuffer> messageBufferList = this.getMessageResult.getMessageBufferList();
             for (ByteBuffer bb : messageBufferList) {
                 if (bb.hasRemaining()) {
+// 参看 NioSocketChannel#doWriteFileRegion
+//                    直接把buffer写进target （socket）
                     transferred += target.write(bb);
                     return transferred;
                 }

@@ -58,6 +58,7 @@ public class RemoteBrokerOffsetStore implements OffsetStore {
     @Override
     public void updateOffset(MessageQueue mq, long offset, boolean increaseOnly) {
         if (mq != null) {
+            // 先放到缓存，一会儿再进行缓存上报，发给broker
             AtomicLong offsetOld = this.offsetTable.get(mq);
             if (null == offsetOld) {
                 offsetOld = this.offsetTable.putIfAbsent(mq, new AtomicLong(offset));

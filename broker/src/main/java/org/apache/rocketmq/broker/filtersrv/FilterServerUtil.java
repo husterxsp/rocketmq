@@ -25,8 +25,11 @@ public class FilterServerUtil {
         Process process = null;
         try {
             String[] cmdArray = splitShellString(shellString);
+
             process = Runtime.getRuntime().exec(cmdArray);
+            // 等待当前这个进程执行结束
             process.waitFor();
+
             log.info("CallShell: <{}> OK", shellString);
         } catch (Throwable e) {
             log.error("CallShell: readLine IOException, {}", shellString, e);

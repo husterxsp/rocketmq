@@ -229,9 +229,9 @@ public class BrokerController {
     public boolean initialize() throws CloneNotSupportedException {
         boolean result = this.topicConfigManager.load();
 
-        result = result && this.consumerOffsetManager.load();
-        result = result && this.subscriptionGroupManager.load();
-        result = result && this.consumerFilterManager.load();
+        result = result && this.consumerOffsetManager.load(); //消费进度
+        result = result && this.subscriptionGroupManager.load(); // 订阅配置
+        result = result && this.consumerFilterManager.load(); // 过滤
 
         if (result) {
             try {
@@ -822,6 +822,9 @@ public class BrokerController {
         return this.brokerConfig.getBrokerIP1() + ":" + this.nettyServerConfig.getListenPort();
     }
 
+    /**
+     * @throws Exception
+     */
     public void start() throws Exception {
         if (this.messageStore != null) {
             this.messageStore.start();
@@ -864,6 +867,8 @@ public class BrokerController {
 
         this.registerBrokerAll(true, false, true);
 
+
+        // Broker 发送心跳包，向nameserver注册
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -1112,6 +1117,8 @@ public class BrokerController {
                 slaveSyncFuture.cancel(false);
             }
             this.slaveSynchronize.setMasterAddr(null);
+
+            // 启动定时任务，进行主从同步
             slaveSyncFuture = this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {

@@ -297,6 +297,7 @@ public abstract class RebalanceImpl {
                         allocateResultSet.addAll(allocateResult);
                     }
 
+                    // 检查是否发生变化
                     boolean changed = this.updateProcessQueueTableInRebalance(topic, allocateResultSet, isOrder);
                     if (changed) {
                         log.info(
@@ -397,6 +398,7 @@ public abstract class RebalanceImpl {
             }
         }
 
+        // 将 pullrequest 添加到 pullRequestService
         this.dispatchPullRequest(pullRequestList);
 
         return changed;

@@ -77,6 +77,8 @@ public class TopicPublishInfo {
                 if (pos < 0)
                     pos = 0;
                 MessageQueue mq = this.messageQueueList.get(pos);
+
+                // 重试的时候，换一个broker
                 if (!mq.getBrokerName().equals(lastBrokerName)) {
                     return mq;
                 }

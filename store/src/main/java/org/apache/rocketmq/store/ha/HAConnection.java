@@ -28,6 +28,9 @@ import org.apache.rocketmq.logging.InternalLoggerFactory;
 import org.apache.rocketmq.remoting.common.RemotingUtil;
 import org.apache.rocketmq.store.SelectMappedBufferResult;
 
+/**
+ * HA Master 服务端HA 连接对象的封装，与Broker 从服务器的网络 读写实现类。
+ */
 public class HAConnection {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
     private final HAService haService;
@@ -78,6 +81,9 @@ public class HAConnection {
         return socketChannel;
     }
 
+    /**
+     * 读实现类
+     */
     class ReadSocketService extends ServiceThread {
         private static final int READ_MAX_BUFFER_SIZE = 1024 * 1024;
         private final Selector selector;
@@ -99,6 +105,8 @@ public class HAConnection {
 
             while (!this.isStopped()) {
                 try {
+                    // 监听读事件
+                    // 每隔 1s 处理一次读就绪事件
                     this.selector.select(1000);
                     boolean ok = this.processReadEvent();
                     if (!ok) {
@@ -145,6 +153,9 @@ public class HAConnection {
             return ReadSocketService.class.getSimpleName();
         }
 
+        /**
+         * 每次读请求调用其processReadEvent来解析从服务器的拉取请求
+         */
         private boolean processReadEvent() {
             int readSizeZeroTimes = 0;
 
@@ -190,6 +201,9 @@ public class HAConnection {
         }
     }
 
+    /**
+     * 写实现类
+     */
     class WriteSocketService extends ServiceThread {
         private final Selector selector;
         private final SocketChannel socketChannel;

@@ -28,6 +28,9 @@ import org.apache.rocketmq.common.protocol.body.SubscriptionGroupWrapper;
 import org.apache.rocketmq.common.protocol.body.TopicConfigSerializeWrapper;
 import org.apache.rocketmq.store.config.StorePathConfigHelper;
 
+/**
+ * 主从同步
+ */
 public class SlaveSynchronize {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.BROKER_LOGGER_NAME);
     private final BrokerController brokerController;
@@ -46,8 +49,11 @@ public class SlaveSynchronize {
     }
 
     public void syncAll() {
+        // topic配置信息
         this.syncTopicConfig();
+        // 消费进度
         this.syncConsumerOffset();
+
         this.syncDelayOffset();
         this.syncSubscriptionGroupConfig();
     }
@@ -58,6 +64,8 @@ public class SlaveSynchronize {
             try {
                 TopicConfigSerializeWrapper topicWrapper =
                     this.brokerController.getBrokerOuterAPI().getAllTopicConfig(masterAddrBak);
+
+                // 版本号不一致就进行更新
                 if (!this.brokerController.getTopicConfigManager().getDataVersion()
                     .equals(topicWrapper.getDataVersion())) {
 

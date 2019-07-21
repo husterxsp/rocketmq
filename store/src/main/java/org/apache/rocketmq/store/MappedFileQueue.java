@@ -166,13 +166,17 @@ public class MappedFileQueue {
                 }
 
                 try {
+//                    这里相当于读取所有的文件，
                     MappedFile mappedFile = new MappedFile(file.getPath(), mappedFileSize);
 
                     mappedFile.setWrotePosition(this.mappedFileSize);
                     mappedFile.setFlushedPosition(this.mappedFileSize);
                     mappedFile.setCommittedPosition(this.mappedFileSize);
+
                     this.mappedFiles.add(mappedFile);
+
                     log.info("load " + file.getPath() + " OK");
+
                 } catch (IOException e) {
                     log.error("load file " + file + " error", e);
                     return false;
@@ -438,6 +442,8 @@ public class MappedFileQueue {
         return deleteCount;
     }
 
+    // 同步？
+    // 异步刷盘，pool为true=, 也会调用2
     public boolean flush(final int flushLeastPages) {
         boolean result = true;
         // 根据最近刷盘位置找到对应的mappedfile
@@ -456,6 +462,7 @@ public class MappedFileQueue {
         return result;
     }
 
+    // 异步刷盘
     public boolean commit(final int commitLeastPages) {
         boolean result = true;
         MappedFile mappedFile = this.findMappedFileByOffset(this.committedWhere, this.committedWhere == 0);

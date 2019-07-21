@@ -237,9 +237,9 @@ public class MQClientInstance {
                     if (null == this.clientConfig.getNamesrvAddr()) {
                         this.mQClientAPIImpl.fetchNameServerAddr();
                     }
-                    // Start request-response channel
+                    // Start request-response channel 启动netty线程？
                     this.mQClientAPIImpl.start();
-                    // Start various schedule tasks
+                    // Start various schedule tasks 各种定时任务
                     this.startScheduledTask();
                     // Start pull service
                     // rocketmq有推、拉两种模式
@@ -248,7 +248,7 @@ public class MQClientInstance {
                     // 负载均衡服务
                     this.rebalanceService.start();
                     // Start push service
-                    //
+                    // push? producer???
                     this.defaultMQProducer.getDefaultMQProducerImpl().start(false);
                     log.info("the client factory [{}] start OK", this.clientId);
                     this.serviceState = ServiceState.RUNNING;

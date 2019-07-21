@@ -704,9 +704,11 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
     }
 
     @Override
-    public SendResult send(
-        Collection<Message> msgs) throws MQClientException, RemotingException, MQBrokerException, InterruptedException {
+    public SendResult send(Collection<Message> msgs)
+            throws MQClientException, RemotingException, MQBrokerException, InterruptedException {
+
         return this.defaultMQProducerImpl.send(batch(msgs));
+
     }
 
     @Override

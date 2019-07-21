@@ -40,14 +40,23 @@ import org.apache.rocketmq.store.ha.HAService;
 import org.apache.rocketmq.store.schedule.ScheduleMessageService;
 
 /**
+ * 对应一个commitLog文件
+ *
  * Store all metadata downtime for recovery, data protection reliability
  */
 public class CommitLog {
-    // Message's MAGIC CODE daa320a7
-    public final static int MESSAGE_MAGIC_CODE = -626843481;
     protected static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
+
+
+    // Message's MAGIC CODE daa320a7
+    /**
+     * 两个消息魔数，表示 是一个消息 和 消息结尾
+     */
+    public final static int MESSAGE_MAGIC_CODE = -626843481;
+
     // End of file empty MAGIC CODE cbd43194
     protected final static int BLANK_MAGIC_CODE = -875286124;
+
     protected final MappedFileQueue mappedFileQueue;
     protected final DefaultMessageStore defaultMessageStore;
     private final FlushCommitLogService flushCommitLogService;
@@ -83,6 +92,7 @@ public class CommitLog {
                 return new MessageExtBatchEncoder(defaultMessageStore.getMessageStoreConfig().getMaxMessageSize());
             }
         };
+        // 初始化锁，有两种方式，reentrantLock和自旋锁
         this.putMessageLock = defaultMessageStore.getMessageStoreConfig().isUseReentrantLockWhenPutMessage() ? new PutMessageReentrantLock() : new PutMessageSpinLock();
 
     }
@@ -558,15 +568,20 @@ public class CommitLog {
         final int tranType = MessageSysFlag.getTransactionValue(msg.getSysFlag());
 
         // 普通消息和事务消息
+        //  （重试消息其实不应该放到这个putMessage这么一个通用方法里面的）
         if (tranType == MessageSysFlag.TRANSACTION_NOT_TYPE
             || tranType == MessageSysFlag.TRANSACTION_COMMIT_TYPE) {
             // Delay Delivery
+//            延时，重试
             if (msg.getDelayTimeLevel() > 0) {
                 if (msg.getDelayTimeLevel() > this.defaultMessageStore.getScheduleMessageService().getMaxDelayLevel()) {
                     msg.setDelayTimeLevel(this.defaultMessageStore.getScheduleMessageService().getMaxDelayLevel());
                 }
 
+//                topic替换，分布式事务 ？
                 topic = ScheduleMessageService.SCHEDULE_TOPIC;
+
+//                deleylevel-1作为queueId
                 queueId = ScheduleMessageService.delayLevel2QueueId(msg.getDelayTimeLevel());
 
                 // Backup real topic, queueId
@@ -742,6 +757,7 @@ public class CommitLog {
 
         messageExtBatch.setEncodedBuff(batchEncoder.encode(messageExtBatch));
 
+        // 获取锁，串行写
         putMessageLock.lock();
         try {
             long beginLockTimestamp = this.defaultMessageStore.getSystemClock().now();
@@ -956,11 +972,13 @@ public class CommitLog {
                 }
 
                 try {
+                    // commit过程就是把堆外内存刷到 page cache 里
                     boolean result = CommitLog.this.mappedFileQueue.commit(commitDataLeastPages);
                     long end = System.currentTimeMillis();
                     if (!result) {
                         this.lastCommitTimestamp = end; // result = false means some data committed.
                         //now wake up flush thread.
+                        // 唤醒刷盘线程
                         flushCommitLogService.wakeup();
                     }
 
@@ -1063,13 +1081,18 @@ public class CommitLog {
         }
     }
 
+    /**
+     * 刷盘请求
+     */
     public static class GroupCommitRequest {
 
+        // 刷盘点偏移量
         private final long nextOffset;
 
-//        等待刷盘是否完成
+        // 等待刷盘是否完成
         private final CountDownLatch countDownLatch = new CountDownLatch(1);
 
+        // ：刷盘结果， 初始为false
         private volatile boolean flushOK = false;
 
         public GroupCommitRequest(long nextOffset) {
@@ -1085,6 +1108,10 @@ public class CommitLog {
             this.countDownLatch.countDown();
         }
 
+        /**
+         * 消费发送线程将消息追加到内存映射文件后，将同步任务 GroupCommitRequest 提交到
+         * GroupCommitService 线程，然后调用阻塞等待刷盘结果
+         */
         public boolean waitForFlush(long timeout) {
             try {
                 this.countDownLatch.await(timeout, TimeUnit.MILLISECONDS);

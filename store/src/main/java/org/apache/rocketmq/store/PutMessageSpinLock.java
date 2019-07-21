@@ -23,6 +23,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class PutMessageSpinLock implements PutMessageLock {
     //true: Can lock, false : in lock.
+    // 注意这里 AtomicBoolean 其实是用了 volatile 实现
+    // 为什么用 AtomicBoolean ? emmm。。感觉直接用volatile + unsafe是一样的
+    // 那么为什么用volatile？保证可见性，如果不用volatile，那么while循环可能不会及时终止，
+    // 还有可能死循环。
     private AtomicBoolean putMessageSpinLock = new AtomicBoolean(true);
 
     @Override
