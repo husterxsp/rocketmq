@@ -271,9 +271,14 @@ public class DefaultMQPullConsumerImpl implements MQConsumerInner {
             consumeMessageContext.setMq(mq);
             consumeMessageContext.setMsgList(pullResult.getMsgFoundList());
             consumeMessageContext.setSuccess(false);
+
+            // 消息追踪
             this.executeHookBefore(consumeMessageContext);
+
             consumeMessageContext.setStatus(ConsumeConcurrentlyStatus.CONSUME_SUCCESS.toString());
             consumeMessageContext.setSuccess(true);
+
+            // 消息追踪
             this.executeHookAfter(consumeMessageContext);
         }
         return pullResult;

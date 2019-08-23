@@ -725,6 +725,9 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             try {
                 //for MessageBatch,ID has been set in the generating process
                 if (!(msg instanceof MessageBatch)) {
+
+//                    MessageBatch 怎么处理？
+                    // 注意这里，为每一个消息设置唯一的一个key，后续用于查找。
                     MessageClientIDSetter.setUniqID(msg);
                 }
 
@@ -758,6 +761,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                     this.executeCheckForbiddenHook(checkForbiddenContext);
                 }
 
+                // 消息追踪，这里有 hook
                 if (this.hasSendMessageHook()) {
                     context = new SendMessageContext();
                     context.setProducer(this);
@@ -869,6 +873,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                         break;
                 }
 
+                // 消息追踪，消息发送执行结束
                 if (this.hasSendMessageHook()) {
                     context.setSendResult(sendResult);
                     this.executeSendMessageHookAfter(context);
@@ -946,6 +951,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         return !this.sendMessageHookList.isEmpty();
     }
 
+    // 消息发送前
     public void executeSendMessageHookBefore(final SendMessageContext context) {
         if (!this.sendMessageHookList.isEmpty()) {
             for (SendMessageHook hook : this.sendMessageHookList) {
@@ -958,6 +964,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         }
     }
 
+    // 消息发送后
     public void executeSendMessageHookAfter(final SendMessageContext context) {
         if (!this.sendMessageHookList.isEmpty()) {
             for (SendMessageHook hook : this.sendMessageHookList) {

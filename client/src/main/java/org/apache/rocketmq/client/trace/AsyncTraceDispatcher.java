@@ -61,9 +61,12 @@ public class AsyncTraceDispatcher implements TraceDispatcher {
     private final ThreadPoolExecutor traceExecutor;
     // The last discard number of log
     private AtomicLong discardCount;
+
+    // worker 线程不断把trace 信息发给broker
     private Thread worker;
     private ArrayBlockingQueue<TraceContext> traceContextQueue;
     private ArrayBlockingQueue<Runnable> appenderQueue;
+
     private volatile Thread shutDownHook;
     private volatile boolean stopped = false;
     private DefaultMQProducerImpl hostProducer;
@@ -220,6 +223,7 @@ public class AsyncTraceDispatcher implements TraceDispatcher {
         }
     }
 
+    // 主要业务逻辑
     class AsyncRunnable implements Runnable {
         private boolean stopped;
 
@@ -268,7 +272,10 @@ public class AsyncTraceDispatcher implements TraceDispatcher {
         }
 
         public void sendTraceData(List<TraceContext> contextList) {
+
+            // TraceContext 编码之后 得到 TraceTransferBean
             Map<String, List<TraceTransferBean>> transBeanMap = new HashMap<String, List<TraceTransferBean>>();
+
             for (TraceContext context : contextList) {
                 if (context.getTraceBeans().isEmpty()) {
                     continue;

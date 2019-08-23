@@ -47,9 +47,13 @@ public class SendMessageTraceHookImpl implements SendMessageHook {
             return;
         }
         //build the context content of TuxeTraceContext
+
+        //
         TraceContext tuxeContext = new TraceContext();
         tuxeContext.setTraceBeans(new ArrayList<TraceBean>(1));
         context.setMqTraceContext(tuxeContext);
+
+        // 类型是发送
         tuxeContext.setTraceType(TraceType.Pub);
         tuxeContext.setGroupName(NamespaceUtil.withoutNamespace(context.getProducerGroup()));
         //build the data bean object of message trace
@@ -76,14 +80,21 @@ public class SendMessageTraceHookImpl implements SendMessageHook {
 
         if (context.getSendResult().getRegionId() == null
             || !context.getSendResult().isTraceOn()) {
+            // isTraceOn 是 broker 的配置，是否打开
+
+            //
             // if switch is false,skip it
             return;
         }
 
         TraceContext tuxeContext = (TraceContext) context.getMqTraceContext();
         TraceBean traceBean = tuxeContext.getTraceBeans().get(0);
+
+        // 消息发送耗时
         int costTime = (int) ((System.currentTimeMillis() - tuxeContext.getTimeStamp()) / tuxeContext.getTraceBeans().size());
         tuxeContext.setCostTime(costTime);
+
+        // 成功还是失败
         if (context.getSendResult().getSendStatus().equals(SendStatus.SEND_OK)) {
             tuxeContext.setSuccess(true);
         } else {
@@ -93,6 +104,8 @@ public class SendMessageTraceHookImpl implements SendMessageHook {
         traceBean.setMsgId(context.getSendResult().getMsgId());
         traceBean.setOffsetMsgId(context.getSendResult().getOffsetMsgId());
         traceBean.setStoreTime(tuxeContext.getTimeStamp() + costTime / 2);
+
+
         localDispatcher.append(tuxeContext);
     }
 }

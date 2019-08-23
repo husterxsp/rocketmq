@@ -421,7 +421,7 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
                     }
                 }
 
-                // 这里调用用户写的listener
+                // 这里调用用户写的listener，这里是实际的消费，所以就在这个的前后添加 消息追踪的hook的实现。
                 status = listener.consumeMessage(Collections.unmodifiableList(msgs), context);
             } catch (Throwable e) {
                 log.warn("consumeMessage exception: {} Group: {} Msgs: {} MQ: {}",

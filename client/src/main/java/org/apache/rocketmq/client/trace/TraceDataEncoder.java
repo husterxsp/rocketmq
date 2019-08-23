@@ -113,6 +113,8 @@ public class TraceDataEncoder {
         //build message trace of the transfering entity content bean
         TraceTransferBean transferBean = new TraceTransferBean();
         StringBuilder sb = new StringBuilder(256);
+
+        // 按照不同的类型，进行不同的编码
         switch (ctx.getTraceType()) {
             case Pub: {
                 TraceBean bean = ctx.getTraceBeans().get(0);
@@ -160,11 +162,14 @@ public class TraceDataEncoder {
             break;
             default:
         }
+        // 设置消息体
         transferBean.setTransData(sb.toString());
         for (TraceBean bean : ctx.getTraceBeans()) {
 
             transferBean.getTransKey().add(bean.getMsgId());
             if (bean.getKeys() != null && bean.getKeys().length() > 0) {
+
+                // 添加key, 用于搜索
                 transferBean.getTransKey().add(bean.getKeys());
             }
         }

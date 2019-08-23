@@ -179,12 +179,19 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
      */
     public DefaultMQProducer(final String producerGroup, RPCHook rpcHook, boolean enableMsgTrace,
         final String customizedTraceTopic) {
+
+        // enableMsgTrace 开启消息追踪
+        // customizedTraceTopic 自定义消息追踪topic
+
         this.producerGroup = producerGroup;
         defaultMQProducerImpl = new DefaultMQProducerImpl(this, rpcHook);
+        
         //if client open the message trace feature
         if (enableMsgTrace) {
             try {
+
                 AsyncTraceDispatcher dispatcher = new AsyncTraceDispatcher(customizedTraceTopic, rpcHook);
+
                 dispatcher.setHostProducer(this.defaultMQProducerImpl);
                 traceDispatcher = dispatcher;
                 this.defaultMQProducerImpl.registerSendMessageHook(
@@ -847,7 +854,10 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
             msgBatch = MessageBatch.generateFromList(msgs);
             for (Message message : msgBatch) {
                 Validators.checkMessage(message, this);
+
+                // ID 设置
                 MessageClientIDSetter.setUniqID(message);
+
                 message.setTopic(withNamespace(message.getTopic()));
             }
             msgBatch.setBody(msgBatch.encode());

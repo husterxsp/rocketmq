@@ -327,6 +327,9 @@ public class CommitLog {
                 uniqKey = propertiesMap.get(MessageConst.PROPERTY_UNIQ_CLIENT_MESSAGE_ID_KEYIDX);
 
                 String tags = propertiesMap.get(MessageConst.PROPERTY_TAGS);
+
+                System.out.println("tags " + tags);
+
                 if (tags != null && tags.length() > 0) {
                     tagsCode = MessageExtBrokerInner.tagsString2tagsCode(MessageExt.parseTopicFilterType(sysFlag), tags);
                 }
